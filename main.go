@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -21,18 +22,32 @@ type User struct {
 var client *mongo.Client
 
 func init() {
-	// Initialize MongoDB client
-	clientOptions := options.Client().ApplyURI("mongodb+srv://srik090704:sk1234@cluster0.inohjsj.mongodb.net/")
+	// Initialize MongoDB client with SSL
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/?ssl=true")
 	client, _ = mongo.Connect(context.TODO(), clientOptions)
 }
 
 func main() {
 	r := mux.NewRouter()
+	r.HandleFunc("/", HomeHandler).Methods("GET")
 	r.HandleFunc("/signup", SignupHandler).Methods("GET", "POST")
 	r.HandleFunc("/login", LoginHandler).Methods("GET", "POST")
 
-	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
+	// Listen on HTTPS
+	http.ListenAndServeTLS(":8443", "cert.pem", "key.pem", r)
+}
+
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	// Display a basic homepage
+	tmpl := `<html>
+		<body>
+			<h1>Welcome to the Login/Signup Page</h1>
+			<a href="/signup">Signup</a>
+			<a href="/login">Login</a>
+		</body>
+	</html>`
+	t, _ := template.New("homepage").Parse(tmpl)
+	t.Execute(w, nil)
 }
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +67,18 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Signup Successful!")
 	} else {
 		// Display the signup form
-		fmt.Fprintln(w, "Signup form here")
+		tmpl := `<html>
+			<body>
+				<h1>Signup</h1>
+				<form method="post" action="/signup">
+					Username: <input type="text" name="username"><br>
+					Password: <input type="password" name="password"><br>
+					<input type="submit" value="Signup">
+				</form>
+			</body>
+		</html>`
+		t, _ := template.New("signup").Parse(tmpl)
+		t.Execute(w, nil)
 	}
 }
 
@@ -80,6 +106,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Display the login form
-		fmt.Fprintln(w, "Login form here")
+		tmpl := `<html>
+			<body>
+				<h1>Login</h1>
+				<form method="post" action="/login">
+					Username: <input type="text" name="username"><br>
+					Password: <input type="password" name="password"><br>
+					<input type="submit" value="Login">
+				</form>
+			</body>
+		</html>`
+		t, _ := template.New("login").Parse(tmpl)
+		t.Execute(w, nil)
 	}
 }
