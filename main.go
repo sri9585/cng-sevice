@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
@@ -53,18 +52,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Signup Successful!")
 	} else {
 		// Display the signup form
-		tmpl := `<html>
-                    <body>
-                        <h1>Signup</h1>
-                        <form method="post" action="/signup">
-                            Username: <input type="text" name="username"><br>
-                            Password: <input type="password" name="password"><br>
-                            <input type="submit" value="Signup">
-                        </form>
-                    </body>
-                </html>`
-		t, _ := template.New("signup").Parse(tmpl)
-		t.Execute(w, nil)
+		fmt.Fprintln(w, "Signup form here")
 	}
 }
 
@@ -92,17 +80,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Display the login form
-		tmpl := `<html>
-                    <body>
-                        <h1>Login</h1>
-                        <form method="post" action="/login">
-                            Username: <input type="text" name="username"><br>
-                            Password: <input type="password" name="password"><br>
-                            <input type="submit" value="Login">
-                        </form>
-                    </body>
-                </html>`
-		t, _ := template.New("login").Parse(tmpl)
-		t.Execute(w, nil)
+		fmt.Fprintln(w, "Login form here")
 	}
 }
